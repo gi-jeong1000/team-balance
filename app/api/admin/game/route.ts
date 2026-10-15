@@ -8,11 +8,11 @@ export async function GET(req:NextRequest){
  if(!code||!/^[A-Z0-9-]{4,12}$/.test(code))return NextResponse.json({error:"게임 코드 오류"},{status:400});
  try{
  const db=serverDb();
- const {data:game,error}=await db.from("games").select("id,name,status,phase,phase_version,current_question_id").eq("join_code",code).maybeSingle();
+ const {data:game,error}=await db.from("games").select("id,name,status,phase,phase_version,current_question_id,reveal_mode").eq("join_code",code).maybeSingle();
  if(error||!game)return NextResponse.json({error:"게임을 찾을 수 없습니다."},{status:404});
  const [{data:teams,error:teamsError},{data:questions,error:questionsError}]=await Promise.all([
  db.from("teams").select("id,name,display_order").eq("game_id",game.id).order("display_order"),
- db.from("questions").select("id,body,option_a,option_b,display_order").eq("game_id",game.id).order("display_order")
+ db.from("questions").select("id,body,option_a,option_b,image_a_path,image_b_path,vote1_seconds,speech_seconds,vote2_seconds,display_order").eq("game_id",game.id).order("display_order")
  ]);
  if(teamsError||questionsError)return NextResponse.json({error:"게임 조회 실패"},{status:500});
  return NextResponse.json({game,teams:teams??[],questions:questions??[]},{headers:{"Cache-Control":"no-store"}});
