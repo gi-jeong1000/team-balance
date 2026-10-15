@@ -1,0 +1,1 @@
+.play-input{width:100%;padding:15px;border:2px solid #f0e2ec;border-radius:14px}.play-options{display:grid;gap:14px;margin:20px 0}.play-options button{padding:23px 16px;border:0;border-radius:18px;font-weight:900;font-size:20px;background:#ffdfeb;color:#aa436e}.play-options button+button{background:#d9efff;color:#3b7ba9}.play-options button:disabled{opacity:.55;cursor:default}
