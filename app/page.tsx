@@ -1,12 +1,7 @@
 "use client";
-import {useState} from "react";
-import Link from "next/link";
-import "./play/play.css";
+import {useState} from 'react';
+import Link from 'next/link';
 export default function Home(){
- const [code,setCode]=useState("");
- const clean=code.trim().toUpperCase();
- return <main className="shell"><header><div className="brand"><span className="brand-mark">⚡</span><span>TEAM <b>BALANCE</b><small>우리 팀의 선택이 승부를 바꾼다!</small></span></div><Link className="quiet" href="/admin">관리자 ↗</Link></header>
- <section className="stage"><div className="stage-pill">🐰 TEAM BALANCE 🐻</div><h1>오늘, 우리 팀의 밸런스는?</h1><p>참가 코드를 입력하고 실시간 밸런스 게임에 참여하세요.</p></section>
- <section className="join-card" style={{maxWidth:580}}><div className="join-emoji">🐰 <span>VS</span> 🐻</div><h2>게임 참가하기</h2><input className="play-input" aria-label="참가 코드" placeholder="진행자가 알려준 참가 코드" value={code} onChange={e=>setCode(e.target.value.toUpperCase())} maxLength={12}/><Link className="primary" style={{display:"block",textAlign:"center",textDecoration:"none",marginTop:16}} href={clean?"/play?code="+encodeURIComponent(clean):"/play"}>참가하기 →</Link><p style={{marginTop:20}}>게임을 운영하시나요? <Link href="/admin">관리자 화면 열기 ↗</Link></p></section>
- <footer>TEAM BALANCE · 실시간 팀 밸런스 게임</footer></main>
+ const [code,setCode]=useState('');const [joining,setJoining]=useState(false);const clean=code.trim().toUpperCase();
+ return <main className="shell"><header><Link className="brand" href="/">TEAM<span className="brand-accent">.</span>BALANCE <b>↗</b></Link><div className="row"><span className="pill">● LIVE GAME</span><Link className="ghost small" href="/admin">관리자 ↗</Link></div></header><section className="prototype-hero"><div className="tag">2026 TEAM WORKSHOP · LET’S PLAY!</div><h1>팀 밸런스<br/><span>게임!</span></h1><div className="mascotrow"><span className="hero-mascot">🐰🥊</span><span className="versus">VS</span><span className="hero-mascot bear">🥊🐻</span></div><p className="muted">선택하고, 설득하고, 뒤집어라.<br/>당신의 한 표가 팀의 운명을 바꾼다.</p><div className="row hero-actions"><button className="primary" onClick={()=>setJoining(v=>!v)}>참가하기 ✨</button><Link className="ghost" href="/screen">스크린 보기 ↗</Link></div>{joining?<form className="panel home-join" action="/play"><label>게임 참가 코드<input aria-label="참가 코드" name="code" placeholder="진행자가 알려준 참가 코드" maxLength={12} value={code} onChange={e=>setCode(e.target.value.toUpperCase())} required/></label><button className="primary" disabled={!clean}>입장하기 →</button></form>:null}</section><footer>Made for team moments ✦ TEAM BALANCE</footer></main>;
 }
