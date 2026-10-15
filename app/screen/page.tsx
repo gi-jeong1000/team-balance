@@ -1,5 +1,6 @@
 "use client";
 import {useEffect,useState} from "react";
+import "../play/play.css";
 type ScreenData={game:{name:string;phase:string;phaseVersion:number};question:{body:string;option_a:string;option_b:string}|null;runtime:{ends_at:string|null;is_paused:boolean;remaining_ms:number|null}|null;result:{winner:number|null;reversal:boolean;vote1_a:number;vote1_b:number;vote2_a:number;vote2_b:number}|null;standings:{name:string;points:number}[]};
 export default function Screen(){
  const [code,setCode]=useState("");const [active,setActive]=useState("");const [data,setData]=useState<ScreenData|null>(null);const [error,setError]=useState("");const [now,setNow]=useState(Date.now());
