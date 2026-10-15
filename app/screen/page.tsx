@@ -4,7 +4,7 @@ import "../play/play.css";
 type ScreenData={game:{name:string;phase:string;phaseVersion:number};question:{body:string;option_a:string;option_b:string}|null;runtime:{ends_at:string|null;is_paused:boolean;remaining_ms:number|null}|null;result:{winner:number|null;reversal:boolean;vote1_a:number;vote1_b:number;vote2_a:number;vote2_b:number}|null;standings:{name:string;points:number}[]};
 export default function Screen(){
  const [code,setCode]=useState("");const [active,setActive]=useState("");const [data,setData]=useState<ScreenData|null>(null);const [error,setError]=useState("");const [now,setNow]=useState(Date.now());
- useEffect(()=>{const id=setInterval(()=>setNow(Date.now()),250);return()=>clearInterval(id)},[]);
+ useEffect(()=>{const initial=new URLSearchParams(window.location.search).get("code")?.trim().toUpperCase();if(initial){setCode(initial);setActive(initial)}const id=setInterval(()=>setNow(Date.now()),250);return()=>clearInterval(id)},[]);
  useEffect(()=>{if(!active)return;let live=true;const load=async()=>{try{const r=await fetch("/api/screen?code="+encodeURIComponent(active),{cache:"no-store"});const j=await r.json();if(!r.ok)throw Error(j.error);if(live){setData(j);setError("")}}catch(e){if(live)setError(e instanceof Error?e.message:"연결 실패")}};void load();const id=setInterval(()=>void load(),2000);return()=>{live=false;clearInterval(id)}},[active]);
  const phase=data?.game.phase;const q=data?.question;const timer=data?.runtime;
  const seconds=timer?.is_paused?Math.ceil((timer.remaining_ms??0)/1000):timer?.ends_at?Math.max(0,Math.ceil((Date.parse(timer.ends_at)-now)/1000)):null;
