@@ -1,5 +1,6 @@
 "use client";
 import {useState} from "react";
+import "../play/play.css";
 const next:Record<string,string>={lobby:"vote1",vote1:"vote1_closed",vote1_closed:"draw",draw:"speech1",speech1:"speech2",speech2:"vote2",vote2:"vote2_closed",vote2_closed:"reveal",reveal:"round_complete"};
 type Game={game:{id:string;phase:string;phase_version:number;current_question_id:string|null;name:string};questions:{id:string;body:string}[];teams:{id:string;name:string}[]};
 export default function Admin(){
