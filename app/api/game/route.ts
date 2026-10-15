@@ -10,7 +10,7 @@ export async function GET(request:NextRequest){
   if(!game)return NextResponse.json({error:"게임을 찾을 수 없습니다."},{status:404});
   const [{data:teams},{data:questions},{data:runtime}]=await Promise.all([
    db.from("teams").select("id,name,display_order").eq("game_id",game.id).order("display_order"),
-   db.from("questions").select("id,body,option_a,option_b,display_order").eq("game_id",game.id).eq("id",game.current_question_id??"00000000-0000-0000-0000-000000000000").order("display_order"),
+   db.from("questions").select("id,body,option_a,option_b,image_a_path,image_b_path,vote1_seconds,speech_seconds,vote2_seconds,display_order").eq("game_id",game.id).eq("id",game.current_question_id??"00000000-0000-0000-0000-000000000000").order("display_order"),
    game.current_question_id?db.from("round_runtime").select("ends_at,is_paused,remaining_ms").eq("phase",game.phase).eq("question_id",game.current_question_id).maybeSingle():Promise.resolve({data:null})
   ]);
   return NextResponse.json({game,teams:teams??[],questions:questions??[],runtime:runtime??null},{headers:{"Cache-Control":"no-store"}});
