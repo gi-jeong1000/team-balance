@@ -1,5 +1,6 @@
 "use client";
 import {useCallback,useEffect,useState} from "react";
+import "./play.css";
 type GameData={game:{id:string;name:string;phase:string;current_question_id:string|null};teams:{id:string;name:string}[];questions:{id:string;body:string;option_a:string;option_b:string}[]};
 type Identity={participantId:string;token:string;gameId:string};
 export default function Play(){
