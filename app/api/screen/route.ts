@@ -11,7 +11,7 @@ export async function GET(req:NextRequest){
  const id=game.current_question_id;
  const [{data:question},{data:runtime},{data:result},{data:teams}]=await Promise.all([
  id?db.from("questions").select("id,body,option_a,option_b").eq("id",id).eq("game_id",game.id).maybeSingle():Promise.resolve({data:null}),
- id?db.from("round_runtime").select("ends_at,is_paused,remaining_ms").eq("question_id",id).maybeSingle():Promise.resolve({data:null}),
+ id?db.from("round_runtime").select("ends_at,is_paused,remaining_ms").eq("phase",game.phase).eq("question_id",id).maybeSingle():Promise.resolve({data:null}),
  id&&["reveal","round_complete","finished"].includes(game.phase)?db.from("round_results").select("winner,reversal,vote1_a,vote1_b,vote2_a,vote2_b").eq("question_id",id).maybeSingle():Promise.resolve({data:null}),
  db.from("teams").select("id,name").eq("game_id",game.id)
  ]);
