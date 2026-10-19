@@ -1,0 +1,5 @@
+'use client';
+import {useState} from 'react';
+import RepresentativeDraw from '../../components/RepresentativeDraw';
+const names=['파랑토끼','주황곰','별빛고래','구름여우','달빛수달','초록펭귄','햇살사자','분홍코알라'];
+export default function Preview(){const [run,setRun]=useState(0);const [fallback,setFallback]=useState(true);const [started,setStarted]=useState(false);return <main className="shell"><header><a className="brand" href="/">TEAM.BALANCE</a><span className="pill">대표자 추첨 · 디자인 미리보기</span></header><div className="row"><button className="primary" onClick={()=>{setRun(n=>n+1);setStarted(true)}}>추첨 연출 시작 / 다시 보기</button><label><input type="checkbox" checked={fallback} onChange={e=>{setFallback(e.target.checked);setStarted(false)}}/>B 선택에 투표자가 없는 상황</label></div><RepresentativeDraw key={run+String(fallback)} draw={{names,representatives:started?[{option:1,speech_order:2,nickname:names[2],fallback:false},{option:2,speech_order:1,nickname:names[5],fallback}]:[]}}/><p className="muted">예시 닉네임을 사용하는 디자인 미리보기입니다. 실제 추첨 결과는 서버에서 결정됩니다.</p></main>}

@@ -1,5 +1,6 @@
 import {NextRequest,NextResponse} from "next/server";
 import {serverDb} from "@/lib/server-db";
+import {getDrawData} from "@/lib/draw-data";
 export const runtime="nodejs";
 export async function GET(request:NextRequest){
  const code=request.nextUrl.searchParams.get("code")?.trim().toUpperCase();
@@ -13,6 +14,7 @@ export async function GET(request:NextRequest){
    db.from("questions").select("id,body,option_a,option_b,image_a_path,image_b_path,vote1_seconds,speech_seconds,vote2_seconds,display_order").eq("game_id",game.id).eq("id",game.current_question_id??"00000000-0000-0000-0000-000000000000").order("display_order"),
    game.current_question_id?db.from("round_runtime").select("ends_at,is_paused,remaining_ms").eq("phase",game.phase).eq("question_id",game.current_question_id).maybeSingle():Promise.resolve({data:null})
   ]);
-  return NextResponse.json({game,teams:teams??[],questions:questions??[],runtime:runtime??null},{headers:{"Cache-Control":"no-store"}});
+  const draw=game.phase==="draw"&&game.current_question_id?await getDrawData(game.id,game.current_question_id):null;
+  return NextResponse.json({game,draw,teams:teams??[],questions:questions??[],runtime:runtime??null},{headers:{"Cache-Control":"no-store"}});
  }catch{return NextResponse.json({error:"게임 조회에 실패했습니다."},{status:500})}
 }

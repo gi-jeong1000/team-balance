@@ -1,6 +1,7 @@
 import {NextRequest,NextResponse} from 'next/server';
 import {serverDb} from '@/lib/server-db';
 import {calculateStandings} from '@/lib/standings';
+import {getDrawData} from '@/lib/draw-data';
 export const runtime='nodejs';
 export async function GET(req:NextRequest){
  const code=req.nextUrl.searchParams.get('code')?.trim().toUpperCase();
@@ -27,6 +28,7 @@ export async function GET(req:NextRequest){
   if(g.reveal_mode==='person')disclosure={mode:'person',rows:(votes??[]).map(v=>({nickname:people?.find(p=>p.id===v.participant_id)?.nickname??'참가자',option:v.option}))};
   else disclosure={mode:'team',rows:(teams??[]).map(t=>{const ids=new Set(people?.filter(p=>p.team_id===t.id).map(p=>p.id));const rows=votes?.filter(v=>ids.has(v.participant_id))??[];return {name:t.name,a:rows.filter(v=>v.option===1).length,b:rows.filter(v=>v.option===2).length}})};
  }
- return NextResponse.json({game:{name:g.name,phase:g.phase,phaseVersion:g.phase_version,revealMode:g.reveal_mode},question,round:question?(questions?.findIndex(q=>q.id===id)??0)+1:0,totalRounds:questions?.length??0,runtime:timer??null,result:result??null,representatives,standings:showResult?standings:[],awards:result?(scores??[]).filter(s=>s.question_id===id).map(s=>({name:teamName.get(s.team_id),points:s.points,reason:s.reason})):[],disclosure},{headers:{'Cache-Control':'no-store'}});
+ const draw=g.phase==='draw'&&id?await getDrawData(g.id,id):null;
+ return NextResponse.json({draw,game:{name:g.name,phase:g.phase,phaseVersion:g.phase_version,revealMode:g.reveal_mode},question,round:question?(questions?.findIndex(q=>q.id===id)??0)+1:0,totalRounds:questions?.length??0,runtime:timer??null,result:result??null,representatives,standings:showResult?standings:[],awards:result?(scores??[]).filter(s=>s.question_id===id).map(s=>({name:teamName.get(s.team_id),points:s.points,reason:s.reason})):[],disclosure},{headers:{'Cache-Control':'no-store'}});
  }catch{return NextResponse.json({error:'화면 조회에 실패했습니다.'},{status:500})}
 }
