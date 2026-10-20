@@ -1,0 +1,28 @@
+'use client';
+import {useEffect,useState} from 'react';
+import type {CSSProperties} from 'react';
+import Mascot from '../components/Mascot';
+import Celebration from '../components/Celebration';
+import './score.css';
+const SESSION_KEY='team-balance-score-v1';
+const colors=['#a88aff','#ffad7f','#7dc9ef','#ef9ecb'];
+export default function Score(){
+ const [scores,setScores]=useState([0,0,0,0]);
+ const [ready,setReady]=useState(false);
+ const [visible,setVisible]=useState(false);
+ const [phase,setPhase]=useState<'playing'|'revealing'|'finished'>('playing');
+ const [notice,setNotice]=useState('팀 카드를 누르면 1점씩 올라가요.');
+ const [pulse,setPulse]=useState<{team:number;id:number;delta:number}|null>(null);
+ const [resetting,setResetting]=useState(false);
+ useEffect(()=>{try{const raw=sessionStorage.getItem(SESSION_KEY);if(raw){const saved=JSON.parse(raw);if(saved.version===1&&Array.isArray(saved.scores)&&saved.scores.length===4&&saved.scores.every((n:unknown)=>typeof n==='number'&&Number.isSafeInteger(n)&&n>=0)){setScores(saved.scores);setVisible(saved.visible===true);if(['playing','revealing','finished'].includes(saved.phase))setPhase(saved.phase);setNotice('이 탭의 점수판을 이어서 진행합니다.')}}}catch{/* Continue in memory if browser storage is unavailable. */}setReady(true)},[]);
+ useEffect(()=>{if(!ready)return;try{sessionStorage.setItem(SESSION_KEY,JSON.stringify({version:1,scores,visible,phase}))}catch{/* The scoreboard remains usable without storage. */}},[ready,scores,visible,phase]);
+ useEffect(()=>{if(phase!=='revealing')return;const timer=setTimeout(()=>setPhase('finished'),2600);return()=>clearTimeout(timer)},[phase]);
+ const top=Math.max(...scores);
+ const winners=scores.map((score,i)=>score===top?i+1:0).filter(Boolean);
+ const ranked=scores.map((score,i)=>({team:i+1,score})).sort((a,b)=>b.score-a.score||a.team-b.team);
+ function award(i:number,delta:number){if(phase!=='playing')return;setScores(s=>s.map((n,j)=>i===j?Math.max(0,n+delta):n));setPulse(p=>({team:i,id:(p?.id??0)+1,delta}));setNotice(`${i+1}팀에 ${delta>0?'1점 부여했어요.':'1점 취소했어요.'}`)}
+ function reset(){setScores([0,0,0,0]);setVisible(false);setPhase('playing');setPulse(null);setResetting(false);setNotice('초기화했어요. 팀 카드를 눌러 점수를 부여하세요.')}
+ return <main className="shell score-shell"><header><a className="brand" href="/">TEAM<span className="brand-accent">.</span>BALANCE</a><span className="pill">WORKSHOP SCOREBOARD</span></header><section className={'score-arena score-phase-'+phase}>
+ {!ready?<div className="score-suspense" role="status"><p>점수판을 준비하고 있어요…</p></div>:phase==='playing'?<><div className="score-heading"><span className="tag">EVERY POINT COUNTS</span><h1>우리 팀의 순간을 모아요.</h1><p>마지막까지 비밀! 우승의 주인공은 누구일까요?</p></div><div className="score-toolbar"><span className="score-privacy">{visible?'● 중간 점수 공개 중':'● 점수 비공개'}</span><button className="score-reveal-toggle" aria-pressed={visible} onClick={()=>setVisible(v=>!v)}>{visible?'점수 다시 숨기기':'중간 과정 공개'}</button></div><div className="score-teams">{scores.map((score,i)=><article className="score-team" key={i} style={{'--team-color':colors[i]} as CSSProperties}><button className="score-award" onClick={()=>award(i,1)} aria-label={`${i+1}팀에 1점 부여`}><span className="score-team-label">TEAM {String(i+1).padStart(2,'0')}</span><span className="score-mascot-wrap"><Mascot side={i%2===0?'A':'B'} priority/>{pulse?.team===i?<span className="score-award-pop" key={pulse.id}>{pulse.delta>0?'+1':'−1'}</span>:null}</span><strong>{i+1}팀</strong><span className="score-total">{visible?<><b key={score}>{score}</b><small>POINTS</small></>:<><b className="score-secret" aria-label="점수 비공개">? ?</b><small>마지막에 공개해요</small></>}</span><span className="score-add-label">클릭해서 +1점 <span>＋</span></span></button><button className="score-subtract" disabled={score===0} onClick={()=>award(i,-1)} aria-label={`${i+1}팀 1점 취소`}>− 1점 취소</button></article>)}</div><div className="score-bottom"><p role="status">{notice}</p><button className="primary score-finish" onClick={()=>{setPhase('revealing');setResetting(false)}}>모든 게임 종료 <span>→</span></button></div></>:phase==='revealing'?<div className="score-suspense" role="status"><span className="tag">THE GRAND FINALE</span><div className="score-suspense-art"><Mascot side="A" priority/><span className="score-question">?</span><Mascot side="B" priority/></div><h1>과연, 최종 우승팀은?</h1><p>지금 공개합니다!</p><div className="waiting-cue"><span aria-hidden="true"><i/><i/><i/></span></div></div>:<div className="score-finale"><Celebration/><span className="tag">{winners.length===1?'ONE TEAM. ONE CHAMPION.':'SHARED GLORY. ONE CELEBRATION.'}</span><div className="score-winner-art"><Mascot side="A" priority/><div className="trophy-art" aria-hidden="true">★</div><Mascot side="B" priority/></div><p className="score-winner-kicker">{winners.length===1?'최종 우승':'최종 공동 우승'}</p><h1>{winners.map(n=>`${n}팀`).join(' · ')}<span>!</span></h1><p className="score-congrats">함께한 모든 순간이 빛났어요. 축하합니다!</p><div className="score-final-ranks">{ranked.map(({team,score})=><div className={score===top?'is-champion':''} key={team}><span>{score===top?'★ ':''}{team}팀</span><strong>{score}<small> PT</small></strong></div>)}</div><button className="score-return" onClick={()=>{setPhase('playing');setVisible(false)}}>점수판으로 돌아가기</button></div>}
+ </section><div className="score-page-foot"><span>TEAM BALANCE · 함께 만드는 승부</span>{ready&&phase!=='revealing'?<button onClick={()=>setResetting(v=>!v)}>초기화</button>:null}</div>{resetting?<div className="score-reset"><p>모든 점수를 0점으로 초기화할까요?</p><button className="ghost" onClick={()=>setResetting(false)}>취소</button><button className="primary" onClick={reset}>초기화하기</button></div>:null}</main>
+}
